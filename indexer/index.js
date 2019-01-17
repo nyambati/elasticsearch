@@ -12,12 +12,11 @@ class Indexer {
   }
 
   loadData(path) {
-    path = require('path').resolve(path);
-    return require(path);
+    return require(require('path').resolve(path));
   }
 
   async createIndex() {
-    // check if the index already exist
+    // Check if the index already exist and exist if exists
     const index = this.indexName;
 
     if (await client.indices.exists({ index })) {
@@ -25,6 +24,7 @@ class Indexer {
       return;
     }
 
+    // Create the index with given index name
     try {
       await client.indices.create({ index });
       console.log(`Index ${index} has been successfully `);
@@ -33,8 +33,10 @@ class Indexer {
     }
   }
 
+  // This function add data to the index
   execute() {
     const source = Rx.Observable.from(this.data)
+      // delay each insert by a second to avoid indexing errors.
       .delay(1000)
       .concatMap(payload =>
         client.index({ index: this.indexName, type: this.type, body: payload })
