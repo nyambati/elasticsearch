@@ -1,40 +1,40 @@
 #!/usr/bin/env node
-require("dotenv").load();
-const Indexer = require("./indexer");
-const commandLineArgs = require("command-line-args");
-const commandLineUsage = require("command-line-usage");
-const Progress = require("ascii-progress");
+require('dotenv').load();
+const Indexer = require('./indexer');
+const commandLineArgs = require('command-line-args');
+const commandLineUsage = require('command-line-usage');
+const Progress = require('ascii-progress');
 // Load environment variables
 
 const optionDefinitions = [
-  { name: "file", alias: "f", type: String },
-  { name: "index", alias: "i", type: String },
-  { name: "type", alias: "t", type: String }
+  { name: 'src', alias: 's', type: String },
+  { name: 'index', alias: 'i', type: String },
+  { name: 'type', alias: 't', type: String }
 ];
 
 const sections = [
   {
-    header: "Elastic search indexer",
-    content: "Creates indexes from supplied data"
+    header: 'Elastic search indexer',
+    content: 'Creates indexes from supplied data'
   },
   {
-    header: "Options",
+    header: 'Options',
     optionList: [
       {
-        name: "file",
-        description: "The location of the file to be indexed"
+        name: 'src',
+        description: 'The location of the file to be indexed'
       },
       {
-        name: "index",
-        description: "Name of the index"
+        name: 'index',
+        description: 'Name of the index'
       },
       {
-        name: "type",
-        description: "Index type"
+        name: 'type',
+        description: 'Index type'
       },
       {
-        name: "help",
-        description: "Print this usage guide."
+        name: 'help',
+        description: 'Print this usage guide.'
       }
     ]
   }
@@ -47,10 +47,10 @@ if (Object.keys(options).length != 3) {
   process.exit(1);
 }
 
-const indexer = new Indexer(options.file, options.index, options.type);
+const indexer = new Indexer(options.src, options.index, options.type);
 
 const progress = new Progress({
-  schema: "[:bar.white] :current/:total :percent :etas",
+  schema: '[:bar.white] :current/:total :percent :etas',
   clear: true,
   total: indexer.data.length
 });

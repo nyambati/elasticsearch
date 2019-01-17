@@ -1,5 +1,5 @@
-const client = require("./client");
-const Rx = require("rxjs");
+const client = require('./client');
+const Rx = require('rxjs');
 
 class Indexer {
   constructor(path, index, type) {
@@ -12,7 +12,7 @@ class Indexer {
   }
 
   loadData(path) {
-    path = require("path").resolve(path);
+    path = require('path').resolve(path);
     return require(path);
   }
 
