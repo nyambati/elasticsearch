@@ -65,10 +65,10 @@ resource "aws_elasticsearch_domain_policy" "mod" {
       ],
       "Condition": {
         "IpAddress": {
-          "aws:SourceIp": ["41.90.125.50/32]
+          "aws:SourceIp": ["${var.cidr_blocks}"]
         }
       },
-      "Resource": "arn:aws:es:us-west-1:987654321098:domain/test-domain/*"
+      "Resource": "${aws_elasticsearch_domain.mod.arn}/*"
     }
   ]
 }

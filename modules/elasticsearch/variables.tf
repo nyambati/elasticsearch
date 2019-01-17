@@ -111,3 +111,7 @@ variable "tags" {
   default     = {}
   description = "Additional resource tags "
 }
+
+variable "cidr_blocks" {
+  type = "list"
+}
