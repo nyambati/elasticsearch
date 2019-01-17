@@ -3,3 +3,4 @@
 *.backup
 *.tfstate
 *.tfvars
+node_modules
