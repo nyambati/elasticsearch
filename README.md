@@ -6,8 +6,8 @@ This repository contains scripts that will enable you to provision an elasticsea
 
 This setups makes use of the following tools and platforms to provision and manage resources
 
-Terraform
-NodeJs
+- Terraform
+- NodeJs
 
 ## Directory structure
 
