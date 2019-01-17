@@ -77,18 +77,6 @@ variable "automated_snapshot_start_hour" {
   default     = 23
 }
 
-variable "security_group_ids" {
-  description = "(Optional) List of VPC Security Group IDs to be applied to the Elasticsearch domain endpoints"
-  type        = "list"
-  default     = []
-}
-
-variable "subnet_ids" {
-  description = "(Required) List of VPC Subnet IDs for the Elasticsearch domain endpoints to be created in."
-  type        = "list"
-  default     = []
-}
-
 variable "log_type" {
   description = "A type of Elasticsearch log."
   default     = "INDEX_SLOW_LOGS"

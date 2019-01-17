@@ -33,11 +33,6 @@ resource "aws_elasticsearch_domain" "mod" {
     automated_snapshot_start_hour = "${var.automated_snapshot_start_hour}"
   }
 
-  vpc_options {
-    security_group_ids = "${var.security_group_ids}"
-    subnet_ids         = "${var.subnet_ids}"
-  }
-
   log_publishing_options {
     log_type                 = "${var.log_type}"
     cloudwatch_log_group_arn = "${var.enable_log_publishing ? aws_cloudwatch_log_group.mod.arn : ""}"
@@ -65,7 +60,7 @@ resource "aws_elasticsearch_domain_policy" "mod" {
       ],
       "Condition": {
         "IpAddress": {
-          "aws:SourceIp": ["${var.cidr_blocks}"]
+          "aws:SourceIp": ["${join("\",\"", var.cidr_blocks)}"]
         }
       },
       "Resource": "${aws_elasticsearch_domain.mod.arn}/*"
