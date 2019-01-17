@@ -35,7 +35,7 @@ class Indexer {
 
   execute() {
     const source = Rx.Observable.from(this.data)
-      .delay(3000)
+      .delay(1000)
       .concatMap(payload =>
         client.index({ index: this.indexName, type: this.type, body: payload })
       );

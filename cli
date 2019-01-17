@@ -56,12 +56,15 @@ const progress = new Progress({
 });
 
 indexer.execute().subscribe(
-  _ => progress.tick(),
+  _ => {
+    progress.clear();
+    progress.tick();
+  },
   error => console.log(error),
   _ => {
+    progress.clear();
     console.log(
       `${indexer.data.length} documents have been successfuly indexed`
     );
-    progress.clear();
   }
 );
