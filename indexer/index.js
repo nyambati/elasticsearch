@@ -16,12 +16,11 @@ class Indexer {
   }
 
   async createIndex() {
-    // Check if the index already exist and exist if exists
     const index = this.indexName;
-
+    // Reset index if it exists
     if (await client.indices.exists({ index })) {
-      console.log(`Index ${index} has already been created`);
-      return;
+      console.log(`Index ${index} already exist resetting..`);
+      await client.indices.delete({ index });
     }
 
     // Create the index with given index name

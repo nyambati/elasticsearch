@@ -7,10 +7,13 @@
   "license": "MIT",
   "dependencies": {
     "ascii-progress": "^1.0.5",
+    "cli-table2": "^0.2.0",
     "command-line-args": "^5.0.2",
     "command-line-usage": "^5.0.5",
     "dotenv": "^6.2.0",
     "elasticsearch": "^15.3.0",
+    "minimist": "^1.2.0",
+    "minimist-options": "^4.0.0",
     "rxjs": "5.2.0"
   }
 }

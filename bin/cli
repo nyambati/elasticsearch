@@ -1,0 +1,111 @@
+#!/usr/bin/env node
+require('dotenv').load();
+const Indexer = require('../indexer');
+const client = require('../indexer/client');
+const { usage, args } = require('./options');
+const Progress = require('ascii-progress');
+const renderTable = require('./render');
+// Load environment variables
+
+class CLI {
+  constructor(args) {
+    this.args = args || {};
+    this.indexer = {};
+  }
+
+  indexSanityCheck() {
+    // Ensure that the args have exactly for options
+    const required = ['src', 'index', 'type'];
+    const keys = Object.keys(this.args);
+
+    if (keys.length !== 4) {
+      return `Index command expects 3 options got ${keys.length - 1}`;
+    }
+
+    //  ensure that the properties
+
+    if (!required.every(key => keys.includes(key))) {
+      return ` --index, --type, --src are the only valid options`;
+    }
+
+    return true;
+  }
+
+  searchSanityCheck() {
+    const required = 'term';
+    const keys = Object.keys(this.args);
+
+    if (keys.length !== 2) {
+      return `Search expects 1 option got ${keys.length - 1}`;
+    }
+
+    if (!keys.includes(required)) {
+      return ` --term is the only valid options`;
+    }
+
+    return true;
+  }
+
+  async runCommand() {
+    const command = this.args._[0];
+
+    if (!(command === 'index' || command === 'search')) {
+      console.log(`Only search and index commands are supported at the moment`);
+      return;
+    }
+
+    let error;
+    switch (command) {
+      case 'index':
+        error = this.indexSanityCheck();
+
+        if (typeof error === 'string') {
+          throw error;
+        }
+
+        const indexer = new Indexer(
+          this.args.src,
+          this.args.index,
+          this.args.type
+        );
+
+        const progress = new Progress({
+          schema: '[:bar.white] :current/:total :percent',
+          width: 500,
+          total: indexer.data.length
+        });
+
+        return indexer.execute().subscribe(
+          _ => progress.tick(),
+          error => console.log(error),
+          _ => {
+            progress.clear();
+            console.log(
+              `${indexer.data.length} documents have been successfuly indexed`
+            );
+          }
+        );
+
+        break;
+      case 'search':
+        error = this.searchSanityCheck();
+        if (typeof error === 'string') {
+          throw error;
+        }
+
+        const response = await client.search({
+          index: this.args._[1],
+          q: this.args.term
+        });
+
+        renderTable(response.hits.hits);
+        break;
+      default:
+        break;
+    }
+  }
+}
+
+const cli = new CLI(args);
+
+cli.runCommand();
