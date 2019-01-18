@@ -17,6 +17,4 @@ const ensureEsConnection = async () => {
   }
 };
 
-ensureEsConnection();
-
 module.exports = client;

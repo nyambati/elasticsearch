@@ -42,6 +42,10 @@ const sections = [
         description: 'The starting offset'
       },
       {
+        name: 'url',
+        description: '[host]:[port] Host of the elasticsearch cluster '
+      },
+      {
         name: 'help',
         description: 'Print this usage guide.'
       }

@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 require('dotenv').load();
+const Progress = require('ascii-progress');
+const fs = require('fs');
 const Indexer = require('../indexer');
 const client = require('../indexer/client');
 const { usage, args } = require('./options');
-const Progress = require('ascii-progress');
 const renderTable = require('./render');
 // Load environment variables
 
@@ -55,7 +56,8 @@ class CLI {
         error = this.indexSanityCheck();
 
         if (typeof error === 'string') {
-          throw error;
+          console.log(error);
+          process.exit();
         }
 
         const indexer = new Indexer(
@@ -111,6 +113,18 @@ class CLI {
         }
 
         break;
+      case 'config':
+        if (!this.args.url) {
+          console.log('Config command requires --url option to be set');
+          return;
+        }
+
+        const url = this.args.url || 'localhost';
+        const path = `${process.cwd()}/.env`;
+        console.log(`Setting elasticsearch host to ${url}`);
+
+        return fs.writeFileSync(path, `ELASTICSEARCH_HOST=${url}`);
+
       default:
         console.log(usage);
         break;

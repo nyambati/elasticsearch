@@ -26,7 +26,7 @@ class Indexer {
     // Create the index with given index name
     try {
       await client.indices.create({ index });
-      console.log(`Index ${index} has been successfully `);
+      console.log(`Index ${index} has been successfully created`);
     } catch (err) {
       throw err;
     }
