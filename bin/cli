@@ -49,11 +49,6 @@ class CLI {
   async runCommand() {
     const command = this.args._[0];
 
-    if (!(command === 'index' || command === 'search')) {
-      console.log(`Only search and index commands are supported at the moment`);
-      return;
-    }
-
     let error;
     switch (command) {
       case 'index':
@@ -88,19 +83,36 @@ class CLI {
 
         break;
       case 'search':
-        error = this.searchSanityCheck();
-        if (typeof error === 'string') {
-          throw error;
+        // error = this.searchSanityCheck();
+        // if (typeof error === 'string') {
+        //   throw error;
+        // }
+
+        const term = this.args.term || this.args._[2];
+        const index = this.args._[1];
+        const offset = this.args.offset || 0;
+        const size = this.args.count || 20;
+        const type = this.args.type;
+
+        try {
+          const response = await client.search({
+            index,
+            q: term,
+            from: offset,
+            size,
+            type,
+            defaultOperator: 'AND'
+          });
+
+          renderTable(response.hits.hits, response.hits.total);
+        } catch (error) {
+          console.log(error.message);
+          process.exit(1);
         }
 
-        const response = await client.search({
-          index: this.args._[1],
-          q: this.args.term
-        });
-
-        renderTable(response.hits.hits);
         break;
       default:
+        console.log(usage);
         break;
     }
   }
