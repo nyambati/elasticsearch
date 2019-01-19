@@ -1,5 +1,6 @@
 const { client } = require('./client');
 const Rx = require('rxjs');
+const path = require('path');
 
 class Indexer {
   constructor(path, index, type) {
@@ -11,8 +12,12 @@ class Indexer {
     this.createIndex();
   }
 
-  loadData(path) {
-    return require(require('path').resolve(path));
+  loadData(url) {
+    if (!path.extname(url) === '.json') {
+      console.log('Only json data format is supported for now');
+      return [];
+    }
+    return require(path.resolve(url));
   }
 
   async createIndex() {

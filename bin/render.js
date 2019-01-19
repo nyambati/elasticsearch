@@ -1,41 +1,42 @@
 const Table = require('cli-table2');
 
-const hasNoData = data => {
-  if (data.length > 0) return false;
-  console.log();
-  console.log('No results to display');
-  console.log();
-  return true;
-};
-
-const renderResultsTable = (data, totalResults) => {
-  if (hasNoData(data)) return;
-
-  const head = [' ', ...Object.keys(data[0]._source)];
-
-  const results = new Table({ head });
-
-  for (let index in data) {
-    results.push([Number(index) + 1, ...Object.values(data[index]._source)]);
+class Render {
+  hasNoData(data) {
+    if (!data && !(data instanceof Object)) return false;
+    if (data.length > 0) return false;
+    console.log();
+    console.log('No results to display');
+    console.log();
+    return true;
   }
 
-  console.log(results.toString());
-  console.log();
-  console.log('TOTAL RESULTS FOUND: ', totalResults);
-  console.log();
-};
+  results(data) {
+    if (this.hasNoData(data.hits)) return;
+    const results = data.hits;
 
-const renderIndicesTable = data => {
-  if (hasNoData) return;
+    const head = [' ', ...Object.keys(results[0]._source)];
 
-  data.forEach((index, i) => {
-    indices.push([Number(i) + 1, index]);
-  });
+    const table = new Table({ head, wordWrap: true });
 
-  console.log(indices.toString());
-};
+    results.forEach((result, index) =>
+      table.push([Number(index) + 1, ...Object.values(results[index]._source)])
+    );
 
-module.exports = {
-  renderResultsTable,
-  renderIndicesTable
-};
+    console.log(table.toString());
+    console.log();
+    console.log('TOTAL RESULTS FOUND: ', data.total);
+    console.log();
+  }
+
+  indices(data) {
+    if (this.hasNoData) return;
+
+    data.forEach((index, i) => {
+      indices.push([Number(i) + 1, index]);
+    });
+
+    console.log(indices.toString());
+  }
+}
+
+module.exports = Render;

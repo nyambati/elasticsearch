@@ -5,7 +5,7 @@ const fs = require('fs');
 const Indexer = require('../indexer');
 const { client, ensureEsConnection } = require('../indexer/client');
 const { usage, args } = require('./options');
-const { renderResultsTable, renderIndicesTable } = require('./render');
+const Render = require('./render');
 // Load environment variables
 
 // Ensure wwe have connection to elastic search
@@ -14,6 +14,7 @@ class CLI {
   constructor(args) {
     this.args = args || {};
     this.indexer = {};
+    this.render = new Render();
   }
 
   indexSanityCheck() {
@@ -34,21 +35,6 @@ class CLI {
     return true;
   }
 
-  searchSanityCheck() {
-    const required = 'term';
-    const keys = Object.keys(this.args);
-
-    if (keys.length !== 2) {
-      return `Search expects 1 option got ${keys.length - 1}`;
-    }
-
-    if (!keys.includes(required)) {
-      return ` --term is the only valid options`;
-    }
-
-    return true;
-  }
-
   parseSearchInput(search) {
     const array = search.split(':');
     const term = array.splice('-1')[0];
@@ -58,6 +44,20 @@ class CLI {
     };
   }
 
+  parseSearchArguments() {
+    const term = String(this.args.term || this.args._[2]);
+    const { fields, search } = this.parseSearchInput(term);
+    return {
+      search,
+      index: this.args._[1],
+      offset: this.args.offset || 0,
+      size: this.args.count,
+      type: this.args.type,
+      // Fuzziness seems to break when using Numeric fields
+      fuzziness: this.args.fuzzy ? 'auto' : undefined,
+      fields
+    };
+  }
   async runCommand() {
     const command = this.args._[0];
 
@@ -79,7 +79,6 @@ class CLI {
 
         const progress = new Progress({
           schema: '[:bar.white] :current/:total :percent',
-          width: 200,
           total: indexer.data.length
         });
 
@@ -96,20 +95,15 @@ class CLI {
 
         break;
       case 'search':
-        // error = this.searchSanityCheck();
-        // if (typeof error === 'string') {
-        //   throw error;
-        // }
-
-        const term = String(this.args.term || this.args._[2]);
-        const index = this.args._[1];
-        const offset = this.args.offset || 0;
-        const size = this.args.count;
-        const type = this.args.type;
-        // Fuzziness seems to break when using Numeric fields
-        const fuzziness = this.args.fuzzy ? 'auto' : undefined;
-
-        const { fields, search } = this.parseSearchInput(term);
+        const {
+          index,
+          offset,
+          type,
+          size,
+          fuzziness,
+          search,
+          fields
+        } = this.parseSearchArguments();
 
         try {
           const response = await client.search({
@@ -130,7 +124,7 @@ class CLI {
             }
           });
 
-          return renderResultsTable(response.hits.hits, response.hits.total);
+          return this.render.results(response.hits);
         } catch (error) {
           console.log(error.message);
           break;
@@ -152,8 +146,7 @@ class CLI {
             index: '_all'
           });
 
-          renderIndicesTable(Object.keys(response));
-          break;
+          return this.render.indices(Object.keys(response));
         } catch (error) {
           console.log(error);
           break;
