@@ -12,9 +12,9 @@ const ensureEsConnection = async () => {
       process.exit(1);
     }
   } catch (error) {
-    console.log(error);
+    console.log(error.message);
     process.exit(1);
   }
 };
 
-module.exports = client;
+module.exports = { client, ensureEsConnection };

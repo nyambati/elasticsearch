@@ -1,8 +1,8 @@
 const Table = require('cli-table2');
 
-const table = new Table({
+const results = new Table({
   head: [
-    'ℹ️',
+    ' ',
     'Passenger Id',
     'Survived',
     'Pclass',
@@ -15,23 +15,43 @@ const table = new Table({
     'Fare',
     'Cabin',
     'Embarked'
-  ],
-  colWidths: [5, 15, 10, 10, 60, 10, 10, 10, 7, 15, 10, 10, 10]
+  ]
 });
 
-const renderTable = (data, totalResults) => {
+const indices = new Table({
+  head: [' ', 'indices'],
+  colWidths: [5, 35]
+});
+
+const renderResultsTable = (data, totalResults) => {
   if (data.length === 0) {
     console.log('================== No results to display =================');
     return;
   }
 
   for (let index in data) {
-    table.push([Number(index) + 1, ...Object.values(data[index]._source)]);
+    results.push([Number(index) + 1, ...Object.values(data[index]._source)]);
   }
-  console.log(table.toString());
+  console.log(results.toString());
   console.log();
   console.log('TOTAL RESULTS FOUND: ', totalResults);
   console.log();
 };
 
-module.exports = renderTable;
+const renderIndicesTable = data => {
+  if (data.length <= 0) {
+    console.log('================== No results to display =================');
+    return;
+  }
+
+  data.forEach((index, i) => {
+    indices.push([Number(i) + 1, index]);
+  });
+
+  console.log(indices.toString());
+};
+
+module.exports = {
+  renderResultsTable,
+  renderIndicesTable
+};

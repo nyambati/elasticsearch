@@ -3,11 +3,13 @@ require('dotenv').load();
 const Progress = require('ascii-progress');
 const fs = require('fs');
 const Indexer = require('../indexer');
-const client = require('../indexer/client');
+const { client, ensureEsConnection } = require('../indexer/client');
 const { usage, args } = require('./options');
-const renderTable = require('./render');
+const { renderResultsTable, renderIndicesTable } = require('./render');
 // Load environment variables
 
+// Ensure wwe have connection to elastic search
+ensureEsConnection();
 class CLI {
   constructor(args) {
     this.args = args || {};
@@ -47,12 +49,21 @@ class CLI {
     return true;
   }
 
+  parseSearchInput(search) {
+    const array = search.split(':');
+    const term = array.splice('-1')[0];
+    return {
+      fields: array.length <= 0 ? undefined : array,
+      search: term
+    };
+  }
+
   async runCommand() {
     const command = this.args._[0];
 
     let error;
     switch (command) {
-      case 'index':
+      case 'set:index':
         error = this.indexSanityCheck();
 
         if (typeof error === 'string') {
@@ -68,7 +79,7 @@ class CLI {
 
         const progress = new Progress({
           schema: '[:bar.white] :current/:total :percent',
-          width: 500,
+          width: 200,
           total: indexer.data.length
         });
 
@@ -90,30 +101,41 @@ class CLI {
         //   throw error;
         // }
 
-        const term = this.args.term || this.args._[2];
+        const term = String(this.args.term || this.args._[2]);
         const index = this.args._[1];
         const offset = this.args.offset || 0;
-        const size = this.args.count || 20;
+        const size = this.args.count;
         const type = this.args.type;
+        // Fuzziness seems to break when using Numeric fields
+        const fuzziness = this.args.fuzzy ? 'auto' : undefined;
+
+        const { fields, search } = this.parseSearchInput(term);
 
         try {
           const response = await client.search({
             index,
-            q: term,
-            from: offset,
-            size,
-            type,
-            defaultOperator: 'AND'
+            body: {
+              from: offset,
+              type,
+              size,
+              query: {
+                multi_match: {
+                  query: `${search}`,
+                  fuzziness,
+                  operator: 'and',
+                  fields,
+                  type: 'most_fields'
+                }
+              }
+            }
           });
 
-          renderTable(response.hits.hits, response.hits.total);
+          return renderResultsTable(response.hits.hits, response.hits.total);
         } catch (error) {
           console.log(error.message);
-          process.exit(1);
+          break;
         }
-
-        break;
-      case 'config':
+      case 'set:config':
         if (!this.args.url) {
           console.log('Config command requires --url option to be set');
           return;
@@ -124,7 +146,18 @@ class CLI {
         console.log(`Setting elasticsearch host to ${url}`);
 
         return fs.writeFileSync(path, `ELASTICSEARCH_HOST=${url}`);
+      case 'list:indices':
+        try {
+          const response = await client.indices.get({
+            index: '_all'
+          });
 
+          renderIndicesTable(Object.keys(response));
+          break;
+        } catch (error) {
+          console.log(error);
+          break;
+        }
       default:
         console.log(usage);
         break;

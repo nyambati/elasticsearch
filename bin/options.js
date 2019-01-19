@@ -46,6 +46,11 @@ const sections = [
         description: '[host]:[port] Host of the elasticsearch cluster '
       },
       {
+        name: 'fuzzy',
+        description:
+          'Enable fuzziness, [Works only when searching string valued columns]'
+      },
+      {
         name: 'help',
         description: 'Print this usage guide.'
       }
