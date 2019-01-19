@@ -1,0 +1,163 @@
+#!/usr/bin/env node
+require('dotenv').load();
+const Progress = require('ascii-progress');
+const fs = require('fs');
+const Indexer = require('../indexer');
+const { client, ensureEsConnection } = require('../indexer/client');
+const { usage, args } = require('./options');
+const Render = require('./render');
+// Load environment variables
+
+// Ensure wwe have connection to elastic search
+ensureEsConnection();
+class CLI {
+  constructor(args) {
+    this.args = args || {};
+    this.indexer = {};
+    this.render = new Render();
+  }
+
+  indexSanityCheck() {
+    // Ensure that the args have exactly for options
+    const required = ['src', 'index', 'type'];
+    const keys = Object.keys(this.args);
+
+    if (keys.length !== 4) {
+      return `Index command expects 3 options got ${keys.length - 1}`;
+    }
+
+    //  ensure that the properties
+
+    if (!required.every(key => keys.includes(key))) {
+      return ` --index, --type, --src are the only valid options`;
+    }
+
+    return true;
+  }
+
+  parseSearchInput(search) {
+    const array = search.split(':');
+    const term = array.splice('-1')[0];
+    return {
+      fields: array.length <= 0 ? undefined : array,
+      search: term
+    };
+  }
+
+  parseSearchArguments() {
+    const term = String(this.args.term || this.args._[2]);
+    const { fields, search } = this.parseSearchInput(term);
+    return {
+      search,
+      index: this.args._[1],
+      offset: this.args.offset || 0,
+      size: this.args.count,
+      type: this.args.type,
+      // Fuzziness seems to break when using Numeric fields
+      fuzziness: this.args.fuzzy ? 'auto' : undefined,
+      fields
+    };
+  }
+  async runCommand() {
+    const command = this.args._[0];
+
+    let error;
+    switch (command) {
+      case 'set:index':
+        error = this.indexSanityCheck();
+
+        if (typeof error === 'string') {
+          console.log(error);
+          process.exit();
+        }
+
+        const indexer = new Indexer(
+          this.args.src,
+          this.args.index,
+          this.args.type
+        );
+
+        const progress = new Progress({
+          schema: '[:bar.white] :current/:total :percent',
+          total: indexer.data.length
+        });
+
+        return indexer.execute().subscribe(
+          _ => progress.tick(),
+          error => console.log(error),
+          _ => {
+            progress.clear();
+            console.log(
+              `${indexer.data.length} documents have been successfuly indexed`
+            );
+          }
+        );
+
+        break;
+      case 'search':
+        const {
+          index,
+          offset,
+          type,
+          size,
+          fuzziness,
+          search,
+          fields
+        } = this.parseSearchArguments();
+
+        try {
+          const response = await client.search({
+            index,
+            body: {
+              from: offset,
+              type,
+              size,
+              query: {
+                multi_match: {
+                  query: `${search}`,
+                  fuzziness,
+                  operator: 'and',
+                  fields,
+                  type: 'most_fields'
+                }
+              }
+            }
+          });
+
+          return this.render.results(response.hits);
+        } catch (error) {
+          console.log(error.message);
+          break;
+        }
+      case 'set:config':
+        if (!this.args.url) {
+          console.log('Config command requires --url option to be set');
+          return;
+        }
+
+        const url = this.args.url || 'localhost';
+        const path = `${process.cwd()}/.env`;
+        console.log(`Setting elasticsearch host to ${url}`);
+
+        return fs.writeFileSync(path, `ELASTICSEARCH_HOST=${url}`);
+      case 'list:indices':
+        try {
+          const response = await client.indices.get({
+            index: '_all'
+          });
+
+          return this.render.indices(Object.keys(response));
+        } catch (error) {
+          console.log(error);
+          break;
+        }
+      default:
+        console.log(usage);
+        break;
+    }
+  }
+}
+
+const cli = new CLI(args);
+
+cli.runCommand();

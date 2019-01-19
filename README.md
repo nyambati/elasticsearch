@@ -75,18 +75,38 @@ $ make destroy
 
 ## Indexer
 
-The indexer is a NodeJs cli that enables you to index data in JSON format into the ES cluster. This CLI takes the following options
+The indexer is a NodeJs cli that enables you to index data in JSON format into the ES cluster as well as make a search. This CLI takes the following commands and options
 
-- `--src`- The source path of json file to be indexed ( alias -s)
-- `--index` - The name of the index to create (alias -i)
-- `--type` - The type to place the indexed data in ( alias -t)
+**Commands**
+
+- `index`- Index data into the cluster
+- `search` - Search data in the cluster based on terms
+
+**Options**
+
+- `--src`- The source path of json file to be indexed
+- `--index` - The name of the index to create
+- `--type` - The type to place the indexed data
+- `--count` - Number of results to be returned
+- `--term` - Term to be searched
+- `--url` - Host of the elastic search cluster
+- `--offset` - The starting offset
 
 You can use this command by running it as follows
 
 ```bash
-$ node cli --src data/titanic.json --index titanic --type survivors
-#or
-$ ./cli --src data/titanic.json --index titanic --type survivors
+# Indexing data
+$ es index --src data/titanic.json --index titanic --type survivors
+
+# Search indexed data
+
+$ es search titanic female --count 30 --offset 5
+#  search - command
+# titanic - index to search from
+# female - Searcch term
+
+# set es host config
+$ es config --url localhost:9200
 ```
 
-Before you run this command you will need to add .env file and add `ELASTICSEARCH_HOST` value. This will inform the script where the elastic search host is
+Before you run this commands you will need link this package by running `npm link` and then add .env file with `ELASTICSEARCH_HOST` value, or run `es config --url localhost:9200`.

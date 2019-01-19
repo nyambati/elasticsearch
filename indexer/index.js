@@ -1,5 +1,6 @@
-const client = require('./client');
+const { client } = require('./client');
 const Rx = require('rxjs');
+const path = require('path');
 
 class Indexer {
   constructor(path, index, type) {
@@ -11,23 +12,26 @@ class Indexer {
     this.createIndex();
   }
 
-  loadData(path) {
-    return require(require('path').resolve(path));
+  loadData(url) {
+    if (!path.extname(url) === '.json') {
+      console.log('Only json data format is supported for now');
+      return [];
+    }
+    return require(path.resolve(url));
   }
 
   async createIndex() {
-    // Check if the index already exist and exist if exists
     const index = this.indexName;
-
+    // Reset index if it exists
     if (await client.indices.exists({ index })) {
-      console.log(`Index ${index} has already been created`);
-      return;
+      console.log(`Index ${index} already exist resetting..`);
+      await client.indices.delete({ index });
     }
 
     // Create the index with given index name
     try {
       await client.indices.create({ index });
-      console.log(`Index ${index} has been successfully `);
+      console.log(`Index ${index} has been successfully created`);
     } catch (err) {
       throw err;
     }
