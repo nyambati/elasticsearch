@@ -29,13 +29,17 @@ class Render {
   }
 
   indices(data) {
-    if (this.hasNoData) return;
+    if (this.hasNoData(data)) return;
 
-    data.forEach((index, i) => {
-      indices.push([Number(i) + 1, index]);
+    const table = new Table({
+      head: ['', 'INDICES'],
+      colWidths: [15, 20]
     });
+    data
+      .filter(idx => !idx.startsWith('.'))
+      .forEach((index, i) => table.push([Number(i) + 1, index]));
 
-    console.log(indices.toString());
+    console.log(table.toString());
   }
 }
 
