@@ -53,6 +53,8 @@ class Commands {
 
     ensureEsConnection();
 
+    if (await Commands.hasNoIndex(index)) return;
+
     try {
       const response = await client.search({
         index,
@@ -90,6 +92,31 @@ class Commands {
       console.log(error);
       return;
     }
+  }
+
+  async ['delete:index'](args) {
+    // check if the index exists
+    const index = args._[1];
+
+    if (await Commands.hasNoIndex(index)) return;
+
+    console.log(`Deleting index ${index} from the cluster`);
+    const response = await client.indices.delete({ index });
+
+    if (!response.acknowledged) {
+      return console.log(`Failed to delete index ${index} from the cluster`);
+    }
+    console.log(
+      `Index ${index} has been successfully deleted from the cluster`
+    );
+  }
+
+  static async hasNoIndex(index) {
+    if (!(await client.indices.exists({ index }))) {
+      console.log(`Specified index ${index} does not exist`);
+      return true;
+    }
+    return false;
   }
 
   static parseSearchInput(search) {
