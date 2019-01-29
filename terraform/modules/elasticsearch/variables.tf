@@ -103,3 +103,10 @@ variable "tags" {
 variable "cidr_blocks" {
   type = "list"
 }
+
+variable "vpc_tags" {}
+
+variable "subnet_ids" {
+  type    = "list"
+  default = []
+}
