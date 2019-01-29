@@ -92,7 +92,9 @@ variable "enable_log_publishing" {
   default     = true
 }
 
-variable "elasticsearch_version" {}
+variable "elasticsearch_version" {
+  default = "6.4"
+}
 
 variable "tags" {
   type        = "map"
@@ -102,4 +104,13 @@ variable "tags" {
 
 variable "cidr_blocks" {
   type = "list"
+}
+
+variable "vpc_tags" {
+  type = "map"
+}
+
+variable "subnet_ids" {
+  type    = "list"
+  default = []
 }

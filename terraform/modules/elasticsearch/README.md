@@ -5,6 +5,7 @@
 - `domain_name` - Name of the domain"
 - `access_policies` - IAM policy document specifying the access policies for the domain
 - `advanced_options` - Key-value string pairs to specify advanced configuration options.
+-
 - `ebs_enabled` - Whether EBS volumes are attached to data nodes in the domain
 - `ebs_volume_type` - The type of EBS volumes attached to data nodes.
 - `ebs_volume_size` - The size of EBS volumes attached to data nodes (in GB)
@@ -25,6 +26,8 @@
 - `cloudwatch_log_group_arn` - ARN of the Cloudwatch log group to which log needs to be published
 - `enable_log_publishing` - pecifies whether given log publishing option is enabled
 - `elasticsearch_version` -
+- `vpc_tags` - Tags to be used to filter VPC
+- `subnet_ids` - Subnet Ids to launch Es Cluster in, if not provided all VPC subnets will be used
 - `tags` - Additional resource tags
 
 ## Usage

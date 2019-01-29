@@ -13,8 +13,11 @@ const sections = [
   {
     header: 'Usage',
     content: [
-      '$ es index {bold --src} {bold --index} {bold --type} ',
+      '$ es set:index {bold --src} {bold --index} {bold --type} ',
+      '$ es set:config {bold --url}',
       '$ es search [{bold index}] {bold --term} {bold --count} {bold --offset} {bold --type}',
+      '$ es list:indices',
+      '$ es delete:index',
       '$ es {bold --help}'
     ]
   },

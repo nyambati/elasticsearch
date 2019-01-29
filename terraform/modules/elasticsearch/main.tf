@@ -1,6 +1,39 @@
+data "aws_vpc" "mod" {
+  tags = "${var.vpc_tags}"
+}
+
+data "aws_subnet_ids" "mod" {
+  vpc_id = "${data.aws_vpc.mod.id}"
+}
+
+locals {
+  subnet_ids = "${split(",", length(var.subnet_ids) > 0 ? join(",", var.subnet_ids) : join(",", data.aws_subnet_ids.mod.ids))}"
+}
+
+resource "aws_security_group" "mod" {
+  name        = "${format("elasticsearch-%s-sg", var.domain_name)}"
+  description = "Elasticsearch security groups"
+  vpc_id      = "${data.aws_vpc.mod.id}"
+
+  ingress {
+    from_port = 443
+    to_port   = 443
+    protocol  = "tcp"
+
+    cidr_blocks = [
+      "${concat(list(data.aws_vpc.mod.cidr_block), var.cidr_blocks)}",
+    ]
+  }
+}
+
 resource "aws_elasticsearch_domain" "mod" {
   domain_name     = "${var.domain_name}"
   access_policies = "${var.access_policies}"
+
+  vpc_options {
+    subnet_ids         = ["${local.subnet_ids}"]
+    security_group_ids = ["${aws_cloudwatch_log_group.mod.id}"]
+  }
 
   advanced_options = "${var.advanced_options}"
 

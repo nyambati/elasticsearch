@@ -1,9 +1,8 @@
-const { client } = require('./client');
 const Rx = require('rxjs');
 const path = require('path');
 
 class Indexer {
-  constructor(path, index, type) {
+  constructor(path, index, type, client) {
     this.path = path;
     this.data = this.loadData(this.path);
     this.client = client;
@@ -23,14 +22,14 @@ class Indexer {
   async createIndex() {
     const index = this.indexName;
     // Reset index if it exists
-    if (await client.indices.exists({ index })) {
+    if (await this.client.indices.exists({ index })) {
       console.log(`Index ${index} already exist resetting..`);
-      await client.indices.delete({ index });
+      await this.client.indices.delete({ index });
     }
 
     // Create the index with given index name
     try {
-      await client.indices.create({ index });
+      await this.client.indices.create({ index });
       console.log(`Index ${index} has been successfully created`);
     } catch (err) {
       throw err;
@@ -43,7 +42,11 @@ class Indexer {
       // delay each insert by a second to avoid indexing errors.
       .delay(1000)
       .concatMap(payload =>
-        client.index({ index: this.indexName, type: this.type, body: payload })
+        this.client.index({
+          index: this.indexName,
+          type: this.type,
+          body: payload
+        })
       );
     return source;
   }
