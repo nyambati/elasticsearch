@@ -5,6 +5,7 @@
 - `domain_name` - Name of the domain"
 - `access_policies` - IAM policy document specifying the access policies for the domain
 - `advanced_options` - Key-value string pairs to specify advanced configuration options.
+-
 - `ebs_enabled` - Whether EBS volumes are attached to data nodes in the domain
 - `ebs_volume_type` - The type of EBS volumes attached to data nodes.
 - `ebs_volume_size` - The size of EBS volumes attached to data nodes (in GB)

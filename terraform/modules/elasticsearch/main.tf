@@ -2,6 +2,14 @@ data "aws_vpc" "mod" {
   tags = "${var.vpc_tags}"
 }
 
+data "aws_subnet_ids" "mod" {
+  vpc_id = "${data.aws_vpc.mod.id}"
+}
+
+locals {
+  subnet_ids = "${split(",", length(var.subnet_ids) > 0 ? join(",", var.subnet_ids) : join(",", data.aws_subnet_ids.mod.ids))}"
+}
+
 resource "aws_security_group" "mod" {
   name        = "${format("elasticsearch-%s-sg", var.domain_name)}"
   description = "Elasticsearch security groups"
@@ -13,7 +21,7 @@ resource "aws_security_group" "mod" {
     protocol  = "tcp"
 
     cidr_blocks = [
-      "${concat(data.aws_vpc.mod.cidr_blocks, var.cidr_blocks)}",
+      "${concat(list(data.aws_vpc.mod.cidr_block), var.cidr_blocks)}",
     ]
   }
 }
@@ -23,8 +31,8 @@ resource "aws_elasticsearch_domain" "mod" {
   access_policies = "${var.access_policies}"
 
   vpc_options {
-    subnet_ids             = ["${var.subnet_ids ? var.subnet_ids : data.aws_vpc.mod.ids}"]
-    aws_security_group_ids = ["${aws_cloudwatch_log_group.mod.id}"]
+    subnet_ids         = ["${local.subnet_ids}"]
+    security_group_ids = ["${aws_cloudwatch_log_group.mod.id}"]
   }
 
   advanced_options = "${var.advanced_options}"
