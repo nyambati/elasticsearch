@@ -1,8 +1,10 @@
-variable "region" {}
+variable "region" {
+  default = "us-east-1"
+}
+
 variable "profile" {}
 
-variable "vpc_id" {}
-
 variable "access_ip_cirdr_blocks" {
-  type = "list"
+  type    = "list"
+  default = []
 }
