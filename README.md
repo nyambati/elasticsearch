@@ -17,13 +17,6 @@ Below is the directory structure
 .
 ├── Makefile
 ├── README.md
-├── cli
-├── data
-│   └── titanic.json
-├── indexer
-│   ├── client.js
-│   └── index.js
-├── package.json
 ├── terraform
 │   ├── alarms.tf
 │   ├── es.tf
@@ -33,7 +26,6 @@ Below is the directory structure
 │   │   ├── alarms
 │   │   └── elasticsearch
 │   └── terraform.tfvars
-└── yarn.lock
 
 ```
 
@@ -75,38 +67,11 @@ $ make destroy
 
 ## Indexer
 
-The indexer is a NodeJs cli that enables you to index data in JSON format into the ES cluster as well as make a search. This CLI takes the following commands and options
+This is an ELasticsearch CLI explorer that enables you to achieve the following functionality
+- Index data from json files
+- Index data from a url
+- Search based on terms and columns
+- List and delete indices
+- Set and view CLI configuration
 
-**Commands**
-
-- `index`- Index data into the cluster
-- `search` - Search data in the cluster based on terms
-
-**Options**
-
-- `--src`- The source path of json file to be indexed
-- `--index` - The name of the index to create
-- `--type` - The type to place the indexed data
-- `--count` - Number of results to be returned
-- `--term` - Term to be searched
-- `--url` - Host of the elastic search cluster
-- `--offset` - The starting offset
-
-You can use this command by running it as follows
-
-```bash
-# Indexing data
-$ es index --src data/titanic.json --index titanic --type survivors
-
-# Search indexed data
-
-$ es search titanic female --count 30 --offset 5
-#  search - command
-# titanic - index to search from
-# female - Searcch term
-
-# set es host config
-$ es config --url localhost:9200
-```
-
-Before you run this commands you will need link this package by running `npm link` and then add .env file with `ELASTICSEARCH_HOST` value, or run `es config --url localhost:9200`.
+The codebase has been moved [nyambati/es](https://github.com/nyambati/es) repository. Further documentation will be provided there.

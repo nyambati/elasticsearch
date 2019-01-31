@@ -3,6 +3,3 @@
 *.backup
 *.tfstate
 *.tfvars
-node_modules
-.env
-titanic.json
