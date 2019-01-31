@@ -70,7 +70,7 @@ $ make destroy
 This is an ELasticsearch CLI explorer that enables you to achieve the following functionality
 - Index data from json files
 - Index data from a url
-- Search based on terms and columns
+- Search based on terms and columns. By term `es search titanic 32`, this will return results where 21 occurs in titanic index, with column or field `es search titanic Age:32` this will search only the Age field.
 - List and delete indices
 - Set and view CLI configuration
 
