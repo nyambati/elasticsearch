@@ -74,4 +74,4 @@ This is an ELasticsearch CLI explorer that enables you to achieve the following 
 - List and delete indices
 - Set and view CLI configuration
 
-The codebase has been moved [nyambati/es](https://github.com/nyambati/es) repository. Further documentation will be provided there.
+The codebase has been moved to [nyambati/es](https://github.com/nyambati/es) repository. Further documentation will be provided there.
